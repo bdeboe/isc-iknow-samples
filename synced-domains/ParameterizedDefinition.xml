@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2017.3 (Build 555U)" ts="2017-04-03 10:43:14">
+<Class name="iKnow.ParameterizedDefinition">
+<Description><![CDATA[
+Code sample for leveraging callbacks to only insert new records since the last domain build.
+See also <a href="https://community.intersystems.com/post/keeping-your-iknow-domain-synchronized">Keeping your iKnow domain synchronized</a>
+on the InterSystems Developer Community.]]></Description>
+<Super>%iKnow.DomainDefinition</Super>
+<TimeChanged>64376,38257.403096</TimeChanged>
+<TimeCreated>64373,49778.907815</TimeCreated>
+
+<XData name="Domain">
+<XMLNamespace>http://www.intersystems.com/iknow</XMLNamespace>
+<Data><![CDATA[
+<domain name="Parameterized build">
+<data dropBeforeBuild="false">
+<query sql="SELECT %ID _id, 'SimpleTable' _group, SomeText FROM iKnow.SimpleTable 
+			WHERE CreateTime &gt;= %domain.GetLastBuildTime() AND CreateTime &lt; %domain.GetCurrentBuildTime()"
+	idField="_id" groupField="_group" dataFields="SomeText" />
+</data>
+</domain>
+]]></Data>
+</XData>
+
+<Method name="GetLastBuildTime">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Date</ReturnType>
+<Implementation><![CDATA[	quit $g(^iKnow.LastBuildTime(..%GetDomainId()), 0)
+]]></Implementation>
+</Method>
+
+<Method name="GetCurrentBuildTime">
+<ClassMethod>1</ClassMethod>
+<ReturnType>%Date</ReturnType>
+<Implementation><![CDATA[	quit $g(^iKnow.LastBuildTime(..%GetDomainId(), "new"), $horolog)
+]]></Implementation>
+</Method>
+
+<Method name="%OnBeforeBuild">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pDomainId:%Integer</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	// at the start of the batch, set the latest CreateTime for which records will be picked up
+	set ^iKnow.LastBuildTime(pDomainId, "new") = $horolog
+	quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="%OnAfterBuild">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pDomainId:%Integer</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	// after finishing, save the cutoff point from which a next batch should start
+	set ^iKnow.LastBuildTime(pDomainId) = ^iKnow.LastBuildTime(pDomainId, "new")
+	kill ^iKnow.LastBuildTime(pDomainId, "new")
+	quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="%OnAfterDropData">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pDomainId:%Integer,pDropDictionaries:%Boolean=1,pDropBlackLists:%Boolean=1</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	// when a domain gets emptied, make sure to clean this up as well
+	kill ^iKnow.LastBuildTime(pDomainId)
+	quit $$$OK
+]]></Implementation>
+</Method>
+</Class>
+</Export>

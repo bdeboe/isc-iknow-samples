@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2017.3 (Build 555U)" ts="2017-04-03 10:43:36">
+<Class name="iKnow.SyncedDefinitionBatch">
+<Description><![CDATA[
+Read-only table for use with <class>iKnow.SyncedDefinition</class>.
+See also <a href="https://community.intersystems.com/post/keeping-your-iknow-domain-synchronized">Keeping your iKnow domain synchronized</a>
+on the InterSystems Developer Community.]]></Description>
+<Final>1</Final>
+<Super>%Persistent</Super>
+<TimeChanged>64376,38401.597878</TimeChanged>
+<TimeCreated>64373,40170.507694</TimeCreated>
+
+<Parameter name="READONLY">
+<Default>1</Default>
+</Parameter>
+
+<Property name="DefinitionClass">
+<Description>
+The domain definition class for which sync info is recorded</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="500"/>
+</Property>
+
+<Property name="RecordTable">
+<Description>
+The data location source table for which sync info is recorded</Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN" value="500"/>
+</Property>
+
+<Property name="RecordID">
+<Description><![CDATA[
+Record ID within <property>RecordTable</property>]]></Description>
+<Type>%String</Type>
+<Parameter name="MAXLEN"/>
+</Property>
+
+<Index name="PK">
+<IdKey>1</IdKey>
+<PrimaryKey>1</PrimaryKey>
+<Properties>DefinitionClass,RecordTable,RecordID</Properties>
+<Unique>1</Unique>
+</Index>
+
+<Storage name="Default">
+<Description>
+Custom storage mapping to ^CacheTemp.iKnow.Sync</Description>
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^CacheTemp.iKnow.Sync</DataLocation>
+<IdLocation>^CacheTemp.iKnow.Sync</IdLocation>
+<IndexLocation>^iKnow.SyncedDefinitionBatchI</IndexLocation>
+<StreamLocation>^iKnow.SyncedDefinitionBatchS</StreamLocation>
+</Storage>
+</Class>
+</Export>

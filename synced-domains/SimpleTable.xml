@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2017.3 (Build 555U)" ts="2017-04-03 10:43:27">
+<Class name="iKnow.SimpleTable">
+<Super>%Persistent</Super>
+<TimeChanged>64376,37932.118347</TimeChanged>
+<TimeCreated>64373,48205.638584</TimeCreated>
+
+<Parameter name="DSTIME">
+<Description><![CDATA[
+DSTIME enabled for use with <class>iKnow.SyncedDefintion</class>]]></Description>
+<Default>AUTO</Default>
+</Parameter>
+
+<Property name="SomeText">
+<Type>%String</Type>
+</Property>
+
+<Property name="CreateTime">
+<Description><![CDATA[
+Insertion date for use with <class>ParameterizedDefinition</class>]]></Description>
+<Type>%Date</Type>
+</Property>
+
+<Method name="%OnNew">
+<Private>1</Private>
+<ReturnType>%Status</ReturnType>
+<ServerOnly>1</ServerOnly>
+<Implementation><![CDATA[
+	set ..CreateTime = $horolog
+	quit $$$OK
+]]></Implementation>
+</Method>
+
+<Storage name="Default">
+<Type>%Library.CacheStorage</Type>
+<DataLocation>^iKnow.SimpleTableD</DataLocation>
+<DefaultData>SimpleTableDefaultData</DefaultData>
+<IdLocation>^iKnow.SimpleTableD</IdLocation>
+<IndexLocation>^iKnow.SimpleTableI</IndexLocation>
+<StreamLocation>^iKnow.SimpleTableS</StreamLocation>
+<Data name="SimpleTableDefaultData">
+<Value name="1">
+<Value>%%CLASSNAME</Value>
+</Value>
+<Value name="2">
+<Value>SomeText</Value>
+</Value>
+<Value name="3">
+<Value>CreateTime</Value>
+</Value>
+</Data>
+</Storage>
+
+<Method name="SaveText">
+<Description>
+Helper method</Description>
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pID:%Integer="",pText:%String=""</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	if (pID="") {
+		set tObj = ..%New()
+	} else {
+		quit:pText="" ..%DeleteId(pID)
+		set tObj = ..%OpenId(pID)
+	}
+	set tObj.SomeText = pText
+	quit tObj.%Save()
+]]></Implementation>
+</Method>
+</Class>
+</Export>

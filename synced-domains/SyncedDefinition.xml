@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2017.3 (Build 555U)" ts="2017-04-03 10:43:31">
+<Class name="iKnow.SyncedDefinition">
+<Description><![CDATA[
+Code sample leveraging DSTIME parameter to keep domains synchronized.
+See also <a href="https://community.intersystems.com/post/keeping-your-iknow-domain-synchronized">Keeping your iKnow domain synchronized</a>
+on the InterSystems Developer Community.]]></Description>
+<Abstract>1</Abstract>
+<Super>%DeepSee.TimeSync,%iKnow.DomainDefinition</Super>
+<TimeChanged>64376,38555.734407</TimeChanged>
+<TimeCreated>64373,39812.232522</TimeCreated>
+<NoExtent>1</NoExtent>
+
+<Method name="%OnBeforeBuild">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pDomainId:%Integer</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	kill ^CacheTemp.iKnow.Sync($classname())
+	set tSC = $$$OK
+	try {
+		#dim tModel as %iKnow.Model.domain = ..%GetModel()
+		quit:'$isobject(tModel.data)
+		
+		// some validation
+		if tModel.data.dropBeforeBuild {
+			set tSC = $$$ERROR($$$GeneralError, "dropBeforeBuild should not be enabled for your <data> element")
+			quit
+		}
+		
+		// go through the data locations and call %Synchronize() for each <table> element
+		for i = 1:1:tModel.data.lists.Count() {
+			if 'tModel.data.lists.GetAt(i).%IsA("%iKnow.Model.listTable") {
+				set tSC = $$$ERROR($$$GeneralError, "only <table> lists can be used as data locations")
+				quit
+			}
+			
+			#dim tListTable as %iKnow.Model.listTable = tModel.data.lists.GetAt(i)
+			
+			// verify metadata for supporting easy SourceID retrieval:
+			//	- groupField should be static string
+			//  - idField should be %ID
+			if $e($zstrip(tListTable.groupField,"<W"))'="'" {
+				set tSC = $$$ERROR($$$GeneralError, "groupField for list "_$s(tListTable.listname="":"#"_i,1:tListTable.listname)_" should be a static string")
+				quit
+			}
+			if $zstrip(tListTable.idField,"<>W")'="%ID" {
+				set tSC = $$$ERROR($$$GeneralError, "idField for list "_$s(tListTable.listname="":"#"_i,1:tListTable.listname)_" should be set to %ID")
+				quit
+			}
+			if $parameter(tListTable.tableName,"DSTIME")'="AUTO" {
+				set tSC = $$$ERROR($$$GeneralError, "the DSTIME parameter on class '"_tListTable.tableName_"' needs to be set to 'AUTO'")
+				quit
+			}
+			
+			// store group reference for External ID retrieval
+			set ^CacheTemp.iKnow.Sync($classname(), tListTable.tableName) = $lb(tListTable.groupField)
+			
+			set tSC = ..%Synchronize(tListTable.tableName, 0)
+			quit:$$$ISERR(tSC)
+		}
+		
+	} catch (ex) {
+		set tSC = ex.AsStatus()
+	}
+	quit tSC
+]]></Implementation>
+</Method>
+
+<Method name="%OnAfterBuild">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pDomainId:%Integer</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	kill ^CacheTemp.iKnow.Sync($classname())
+	quit $$$OK
+]]></Implementation>
+</Method>
+
+<Method name="%OnProcessObject">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pClassName:%String(MAXLEN=""),pID:%String(MAXLEN="")="",pFileAction:%Integer=0,pTimeStamp:%Integer</FormalSpec>
+<ReturnType>%Status</ReturnType>
+<Implementation><![CDATA[
+	set tSC = $$$OK
+	try {
+		
+		if (pFileAction=0) || (pFileAction=2) { // UPDATE or DELETE
+			
+			// construct External ID and then retrieve Source ID
+			set tSourceID = ..GetSourceIDForTable(pClassName, pID, .tSC)
+			quit:$$$ISERR(tSC)
+		
+			// TODO: could check and skip if the text didn't change in case of UPDATE
+			
+			// Note: this is a costly operation!
+			set tSC = ##class(%iKnow.Source.Loader).DeleteSource(..%GetDomainId(), tSourceID)
+			quit:$$$ISERR(tSC)
+		}
+		
+		if (pFileAction=0) || (pFileAction=1) { // UPDATE or INSERT
+			// queue for picking up by WHERE clause on iKnow.SyncedDefinitionBatch
+			set ^CacheTemp.iKnow.Sync($classname(), pClassName, pID) = ""
+		}
+		
+	} catch (ex) {
+		set tSC = ex.AsStatus()
+	}
+	quit tSC
+]]></Implementation>
+</Method>
+
+<Method name="GetSourceIDForTable">
+<ClassMethod>1</ClassMethod>
+<FormalSpec>pClassName:%String(MAXLEN=""),pID:%String(MAXLEN=""),*pSC:%Status</FormalSpec>
+<ReturnType>%Integer</ReturnType>
+<Implementation><![CDATA[
+	set pSC = $$$OK, tSourceID = ""
+	try {
+		// Assumed External ID structure:
+		//	- SQL lister structure: ':SQL:groupname:idfield'
+		//  - groupname is static and saved at ^CacheTemp.iKnow.Sync($classname(), pClassName)
+		//  - idfield is equal to class' %ID
+		set tGroupName = $lg($g(^CacheTemp.iKnow.Sync($classname(), pClassName)))
+		set tGroupName = $replace($piece(tGroupName,"'",2,*-1),"''","'")
+		set tExternalID = ##class(%iKnow.Source.SQL.Lister).BuildExtIdFromName(..%GetDomainId(), tGroupName, pID, .pSC)
+		quit:$$$ISERR(pSC)
+		set tSourceID = ##class(%iKnow.Queries.SourceAPI).GetSourceId(..%GetDomainId(), tExternalID, .pSC)
+		quit:$$$ISERR(pSC)
+		
+	} catch (ex) {
+		set pSC = ex.AsStatus()
+	}
+	quit tSourceID
+]]></Implementation>
+</Method>
+</Class>
+</Export>
