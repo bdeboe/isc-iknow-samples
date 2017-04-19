@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2017.3 (Build 555U)" ts="2017-04-03 10:43:27">
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2017.3 (Build 555U)" ts="2017-04-19 10:36:39">
 <Class name="iKnow.SimpleTable">
 <Super>%Persistent</Super>
-<TimeChanged>64376,37932.118347</TimeChanged>
+<TimeChanged>64392,38002.417861</TimeChanged>
 <TimeCreated>64373,48205.638584</TimeCreated>
 
 <Parameter name="DSTIME">
@@ -18,7 +18,7 @@ DSTIME enabled for use with <class>iKnow.SyncedDefintion</class>]]></Description
 <Property name="CreateTime">
 <Description><![CDATA[
 Insertion date for use with <class>ParameterizedDefinition</class>]]></Description>
-<Type>%Date</Type>
+<Type>%DeepSee.Datatype.dateTime</Type>
 </Property>
 
 <Method name="%OnNew">

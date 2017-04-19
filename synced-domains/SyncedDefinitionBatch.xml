@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2017.3 (Build 555U)" ts="2017-04-03 10:43:36">
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2017.3 (Build 555U)" ts="2017-04-19 10:37:04">
 <Class name="iKnow.SyncedDefinitionBatch">
 <Description><![CDATA[
 Read-only table for use with <class>iKnow.SyncedDefinition</class>.
@@ -7,18 +7,17 @@ See also <a href="https://community.intersystems.com/post/keeping-your-iknow-dom
 on the InterSystems Developer Community.]]></Description>
 <Final>1</Final>
 <Super>%Persistent</Super>
-<TimeChanged>64376,38401.597878</TimeChanged>
+<TimeChanged>64392,37740.209796</TimeChanged>
 <TimeCreated>64373,40170.507694</TimeCreated>
 
 <Parameter name="READONLY">
 <Default>1</Default>
 </Parameter>
 
-<Property name="DefinitionClass">
+<Property name="DomainId">
 <Description>
-The domain definition class for which sync info is recorded</Description>
-<Type>%String</Type>
-<Parameter name="MAXLEN" value="500"/>
+The domain ID for which sync info is recorded</Description>
+<Type>%Integer</Type>
 </Property>
 
 <Property name="RecordTable">
@@ -38,7 +37,7 @@ Record ID within <property>RecordTable</property>]]></Description>
 <Index name="PK">
 <IdKey>1</IdKey>
 <PrimaryKey>1</PrimaryKey>
-<Properties>DefinitionClass,RecordTable,RecordID</Properties>
+<Properties>DomainId,RecordTable,RecordID</Properties>
 <Unique>1</Unique>
 </Index>
 
@@ -46,8 +45,8 @@ Record ID within <property>RecordTable</property>]]></Description>
 <Description>
 Custom storage mapping to ^CacheTemp.iKnow.Sync</Description>
 <Type>%Library.CacheStorage</Type>
-<DataLocation>^CacheTemp.iKnow.Sync</DataLocation>
-<IdLocation>^CacheTemp.iKnow.Sync</IdLocation>
+<DataLocation>^CacheTemp.iKnow.Sync($namespace)</DataLocation>
+<IdLocation>^CacheTemp.iKnow.Sync($namespace)</IdLocation>
 <IndexLocation>^iKnow.SyncedDefinitionBatchI</IndexLocation>
 <StreamLocation>^iKnow.SyncedDefinitionBatchS</StreamLocation>
 </Storage>

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2017.3 (Build 555U)" ts="2017-04-03 10:43:23">
+<Export generator="Cache" version="25" zv="Cache for Windows (x86-64) 2017.3 (Build 555U)" ts="2017-04-19 10:36:48">
 <Class name="iKnow.SimpleDefinition">
 <Description><![CDATA[
 Sample implementation of <class>iKnow.SyncedDefinition</class>.
 See also <a href="https://community.intersystems.com/post/keeping-your-iknow-domain-synchronized">Keeping your iKnow domain synchronized</a>
 on the InterSystems Developer Community.]]></Description>
 <Super>iKnow.SyncedDefinition</Super>
-<TimeChanged>64376,38223.68448</TimeChanged>
+<TimeChanged>64392,37716.661497</TimeChanged>
 <TimeCreated>64373,48280.794238</TimeCreated>
 
 <XData name="Domain">
@@ -16,7 +16,7 @@ on the InterSystems Developer Community.]]></Description>
 <parameter name="$$$IKPIGNOREEMPTYBATCH" value="1" />
 <data dropBeforeBuild="false">
 <table tableName="iKnow.SimpleTable" groupField="'SimpleTable'" idField="%ID" dataFields="SomeText"
-whereClause="%ID IN (SELECT RecordID FROM iKnow.SyncedDefinitionBatch WHERE DefinitionClass = 'iKnow.SimpleDefinition' AND RecordTable = 'iKnow.SimpleTable')" />
+whereClause="%ID IN (SELECT RecordID FROM iKnow.SyncedDefinitionBatch WHERE DomainId = %domain.%GetDomainId() AND RecordTable = 'iKnow.SimpleTable')" />
 </data>
 </domain>
 ]]></Data>
